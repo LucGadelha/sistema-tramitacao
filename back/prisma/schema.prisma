@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Setor {
+  id        Int    @id @default(autoincrement())
+  sigla     String @unique @db.VarChar(10)
+  descricao String @db.VarChar(60)
+
+  tramitacoesEnviadas  TramitacaoDocumento[] @relation("Envios")
+  tramitacoesRecebidas TramitacaoDocumento[] @relation("Recebimentos")
+}
+
+model TramitacaoDocumento {
+  id              Int       @id @default(autoincrement())
+  documentoId     Int
+  setorEnvioId    Int
+  setorRecebeId   Int
+  dataEnvio       DateTime  @default(now())
+  dataRecebimento DateTime?
+
+  documento   Documento @relation(fields: [documentoId], references: [id])
+  setorEnvio  Setor     @relation("Envios", fields: [setorEnvioId], references: [id])
+  setorRecebe Setor     @relation("Recebimentos", fields: [setorRecebeId], references: [id])
+}
+
+model Documento {
+  id              Int      @id @default(autoincrement())
+  numero          String   @unique @db.VarChar(10)
+  titulo          String   @db.VarChar(40)
+  descricao       String   @db.VarChar(255)
+  dataCadastro    DateTime @default(now())
+  arquivo         String   @db.VarChar(100)
+  tipoDocumentoId Int
+
+  tipoDocumento TipoDocumento         @relation(fields: [tipoDocumentoId], references: [id])
+  tramitacoes   TramitacaoDocumento[]
+}
+
+model TipoDocumento {
+  id         Int         @id @default(autoincrement())
+  descricao  String      @db.VarChar(30)
+  documentos Documento[]
+}
