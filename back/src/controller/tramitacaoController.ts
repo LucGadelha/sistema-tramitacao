@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
-import prisma from '../models/prismaClient';
+import { Request, Response } from "express";
+import prisma from "../models/prismaClient";
 
-// Função para registrar tramitação
 export const createTramitacao = async (req: Request, res: Response) => {
   const { documentoId, setorEnvioId, setorRecebeId } = req.body;
   try {
@@ -14,11 +13,10 @@ export const createTramitacao = async (req: Request, res: Response) => {
     });
     res.json(tramitacao);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao registrar tramitação' });
+    res.status(500).json({ error: "Erro ao registrar tramitação" });
   }
 };
 
-// Função para consultar tramitações
 export const getTramitacoes = async (req: Request, res: Response) => {
   try {
     const tramitacoes = await prisma.tramitacaoDocumento.findMany({
@@ -30,6 +28,6 @@ export const getTramitacoes = async (req: Request, res: Response) => {
     });
     res.json(tramitacoes);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao listar tramitações' });
+    res.status(500).json({ error: "Erro ao listar tramitações" });
   }
 };

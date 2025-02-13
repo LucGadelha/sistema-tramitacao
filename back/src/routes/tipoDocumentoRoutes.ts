@@ -1,4 +1,7 @@
-import { getTipoDocumentos, createTipoDocumento } from './../controller/tipoeDocumentoController';
+import {
+  getTipoDocumentos,
+  createTipoDocumento,
+} from "../controller/tipoDocumentoController";
 import { Router } from "express";
 
 const router = Router();

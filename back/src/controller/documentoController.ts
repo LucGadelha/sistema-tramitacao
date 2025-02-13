@@ -1,7 +1,6 @@
-import { Request, Response } from 'express';
-import prisma from '../models/prismaClient';
+import { Request, Response } from "express";
+import prisma from "../models/prismaClient";
 
-// Função para cadastrar documento
 export const createDocumento = async (req: Request, res: Response) => {
   try {
     const { numero, titulo, descricao, arquivo, tipoDocumentoId } = req.body;
@@ -16,11 +15,10 @@ export const createDocumento = async (req: Request, res: Response) => {
   }
 };
 
-// Função para listar documentos
 export const getDocumentos = async (req: Request, res: Response) => {
   try {
     const documentos = await prisma.documento.findMany({
-      include: { tipoDocumento: true }, // Traz informações do tipo de documento
+      include: { tipoDocumento: true },
     });
     res.json(documentos);
   } catch (error) {
