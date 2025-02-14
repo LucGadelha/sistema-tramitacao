@@ -1,9 +1,11 @@
-import express from 'express';
-import { getSetores, createSetor } from './../controller/setorController';
+import { getSetores, createSetor, updateSetor, deleteSetor } from "../controller/setorController";
+import { Router } from "express";
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', createSetor);
-router.get('/', getSetores);
+router.get("/", getSetores);
+router.post("/", createSetor);
+router.put("/:id", updateSetor);
+router.delete("/:id", deleteSetor);
 
 export default router;

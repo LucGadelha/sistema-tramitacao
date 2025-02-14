@@ -1,9 +1,16 @@
-import express from 'express';
-import { getTramitacoes, createTramitacao } from './../controller/tramitacaoController';
+import { Router, Request, Response, NextFunction } from "express";
+import { createTramitacao, getTramitacoes, deleteTramitacao, registrarRecebimento } from "../controller/tramitacaoController";
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', createTramitacao);
-router.get('/', getTramitacoes);
+const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
+  (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+
+router.post("/", asyncHandler(createTramitacao));
+router.get("/", asyncHandler(getTramitacoes));
+router.put("/:id/receber", asyncHandler(registrarRecebimento));
+router.delete("/:id", asyncHandler(deleteTramitacao));
 
 export default router;
