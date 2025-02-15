@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPaperclip } from "react-icons/fa";
 import axios from "axios";
 
@@ -18,6 +18,20 @@ const FormsCadDoc: React.FC<FormsCadDocProps> = ({ onClose, onUpdate }) => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [tiposDocumento, setTiposDocumento] = useState<{ id: number; descricao: string }[]>([]); // Estado para armazenar tipos de documentos
+
+  useEffect(() => {
+    const fetchTiposDocumento = async () => {
+      try {
+        const response = await axios.get("http://localhost:3030/tipos-documento");
+        setTiposDocumento(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar tipos de documento:", error);
+      }
+    };
+
+    fetchTiposDocumento();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -77,9 +91,11 @@ const FormsCadDoc: React.FC<FormsCadDocProps> = ({ onClose, onUpdate }) => {
           className="border rounded px-3 py-2 w-full"
         >
           <option value="">Tipo de Documento</option>
-          <option value="1">Relatório</option>
-          <option value="2">Contrato</option>
-          <option value="3">Outro</option>
+          {tiposDocumento.map((tipo) => (
+            <option key={tipo.id} value={tipo.id}>
+              {tipo.descricao}
+            </option>
+          ))}
         </select>
       </div>
 

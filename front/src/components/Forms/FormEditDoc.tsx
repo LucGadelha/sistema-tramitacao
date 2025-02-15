@@ -19,6 +19,20 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [tiposDocumento, setTiposDocumento] = useState<{ id: number; descricao: string }[]>([]); // Estado para armazenar tipos de documentos
+
+  useEffect(() => {
+    const fetchTiposDocumento = async () => {
+      try {
+        const response = await axios.get("http://localhost:3030/tipos-documento");
+        setTiposDocumento(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar tipos de documento:", error);
+      }
+    };
+
+    fetchTiposDocumento();
+  }, []);
 
   useEffect(() => {
   if (documentoId) {
@@ -107,9 +121,11 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
           className="border border-gray-300 rounded-md px-3 py-2 w-full"
         >
           <option value="">Tipo de Documento</option>
-          <option value="1">Relatório</option>
-          <option value="2">Contrato</option>
-          <option value="3">Outro</option>
+          {tiposDocumento.map((tipo) => (
+            <option key={tipo.id} value={tipo.id}>
+              {tipo.descricao}
+            </option>
+          ))}
         </select>
       </div>
 

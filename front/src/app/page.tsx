@@ -5,6 +5,7 @@ import { FaEdit, FaTrash, FaFilePdf, FaPlus } from "react-icons/fa";
 import Modal from "@/components/Modal"; // Modal reutilizável
 import FormsCadDoc from "@/components/Forms/FormCadDoc";
 import FormEditDoc from "@/components/Forms/FormEditDoc";
+import FormsTramitacaoDoc from  "@/components/Forms/FormTramitacaoDoc";
 
 const DocumentManager = () => {
   interface Documento {
@@ -48,14 +49,15 @@ const DocumentManager = () => {
     setShowModal(true);
   };
 
-  // Implementação correta das funções
+  // Fechar o modal e resetar seleção
   const fecharModal = () => {
     setShowModal(false);
     setDocumentoSelecionado(null);
   };
 
+  // Atualiza a lista de documentos
   const atualizarLista = () => {
-    fetchDocumentos(); // Atualiza a lista de documentos
+    fetchDocumentos();
   };
 
   return (
@@ -69,9 +71,9 @@ const DocumentManager = () => {
             <FaPlus /> Cadastrar
           </button>
           <button 
-            onClick={() => handleOpenModal("envio")}
+            onClick={() => handleOpenModal("tramitacao")} 
             className="bg-blue-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2">
-            <FaPlus /> Envio Documento
+            <FaPlus /> Tramitação Documento
           </button>
         </div>
 
@@ -119,21 +121,23 @@ const DocumentManager = () => {
         </table>
       </div>
 
-      {/* Modal para cadastrar, editar ou envio de documento */}
+      {/* Modal para cadastro, edição ou tramitação de documento */}
       {showModal && (
         <Modal 
-          title={modalType === "cadastrar" ? "Cadastrar Documento" 
-                : modalType === "editar" ? "Editar Documento" 
-                : "Envio de Documento"} 
+          title={
+            modalType === "cadastrar" ? "Cadastrar Documento" 
+            : modalType === "editar" ? "Editar Documento" 
+            : "Tramitação de Documento"
+          } 
           onClose={fecharModal}
         >
           {modalType === "cadastrar" ? (
             <FormsCadDoc onClose={fecharModal} onUpdate={atualizarLista} />
           ) : modalType === "editar" && documentoSelecionado ? (
             <FormEditDoc documentoId={documentoSelecionado?.id} onClose={fecharModal} onUpdate={atualizarLista} />
-          ) : (
-            <p>Formulário de envio aqui...</p>
-          )}
+          ) : modalType === "tramitacao" ? (
+            <FormsTramitacaoDoc onClose={fecharModal} onUpdate={atualizarLista} />
+          ) : null}
         </Modal>
       )}
     </div>

@@ -14,7 +14,14 @@ export const createSetor = async (req: Request, res: Response) => {
 export const getSetores = async (_req: Request, res: Response) => {
   try {
     const setores = await prisma.setor.findMany();
-    res.json(setores);
+    
+    // Transformando os dados para corresponder ao que o frontend espera
+    const setoresFormatados = setores.map((setor) => ({
+      id: setor.id,
+      nome: setor.descricao, // Usando 'descricao' como 'nome'
+    }));
+
+    res.json(setoresFormatados);
   } catch (error) {
     res.status(500).json({ error: "Erro ao listar setores" });
   }
