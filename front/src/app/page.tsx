@@ -60,6 +60,20 @@ const DocumentManager = () => {
     fetchDocumentos();
   };
 
+  const handleDeleteDocumento = async (id: number) => {
+  const confirmDelete = window.confirm("Tem certeza que deseja deletar este documento?");
+  if (confirmDelete) {
+    try {
+      await axios.delete(`http://localhost:3030/documentos/${id}`);
+      // Atualiza a lista de documentos após a exclusão
+      atualizarLista();
+    } catch (error) {
+      console.error("Erro ao deletar documento", error);
+      alert("Erro ao deletar documento. Tente novamente.");
+    }
+  }
+};
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="bg-white shadow-lg rounded-lg p-4">
@@ -111,9 +125,12 @@ const DocumentManager = () => {
                   >
                     <FaEdit />
                   </button>
-                  <button className="text-red-600 hover:text-red-800">
-                    <FaTrash />
-                  </button>
+                  <button 
+  className="text-red-600 hover:text-red-800" 
+  onClick={() => handleDeleteDocumento(doc.id)}
+>
+  <FaTrash />
+</button>
                 </td>
               </tr>
             ))}
