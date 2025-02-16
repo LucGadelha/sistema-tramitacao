@@ -43,9 +43,34 @@ export const createDocumento = async (req: Request, res: Response): Promise<void
 export const getDocumentos = async (_req: Request, res: Response): Promise<void> => {
   try {
     const documentos = await prisma.documento.findMany({
-      include: { tipoDocumento: true },
+      include: {
+        tipoDocumento: true,
+        tramitacoes: {
+          include: {
+            setorEnvio: true, // Inclui o setor que enviou
+            setorRecebe: true,
+          },
+          orderBy: { createdAt: 'asc' }, // Ordena pelas tramitações mais antigas
+        },
+      },
     });
-    res.json(documentos);
+
+    // Formata os documentos para incluir o setor de envio e a data de envio
+    const documentosFormatados = documentos.map(doc => {
+      const tramitacaoRecebida = doc.tramitacoes.find(tr => tr.recebido); // Busca a tramitação recebida
+      const primeiraTramiacao = doc.tramitacoes[0]; // Pega a primeira tramitação
+
+      return {
+        ...doc,
+        tramitacaoId: primeiraTramiacao?.id, // Pega o ID da primeira tramitação
+        setorEnvio: doc.tramitacoes[0]?.setorEnvio, // Pega o setor da primeira tramitação
+        dataEnvio: doc.tramitacoes[0]?.createdAt || null, // Pega a data da primeira tramitação
+        setorRecebe: tramitacaoRecebida?.setorRecebe, // Pega o setor que recebeu, se houver
+        dataRecebimento: tramitacaoRecebida?.createdAt || null, // Pega a data de recebimento, se houver
+      };
+    });
+
+    res.json(documentosFormatados);
   } catch (error) {
     console.error("Erro ao buscar documentos:", error);
     res.status(500).json({ error: "Erro ao buscar documentos" });
@@ -103,7 +128,6 @@ export const updateDocumento = async (req: Request, res: Response): Promise<void
   try {
     const { id } = req.params;
 
-    // Buscar documento existente
     const documentoExistente = await prisma.documento.findUnique({
       where: { id: Number(id) },
     });
@@ -113,19 +137,17 @@ export const updateDocumento = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Criar objeto de atualização sem sobrescrever o campo "arquivo" caso nenhum novo arquivo seja enviado
     const updatedData: any = { 
       numero: req.body.numero ?? documentoExistente.numero,
       titulo: req.body.titulo ?? documentoExistente.titulo,
       descricao: req.body.descricao ?? documentoExistente.descricao,
       tipoDocumentoId: req.body.tipoDocumentoId ? Number(req.body.tipoDocumentoId) : documentoExistente.tipoDocumentoId,
-      arquivo: documentoExistente.arquivo, // Mantém o mesmo arquivo por padrão
+      arquivo: documentoExistente.arquivo,
     };
 
     if (req.file) {
       const newFilePath = `uploads/${req.file.filename}`;
 
-      // Remover arquivo antigo se houver um novo
       if (documentoExistente.arquivo) {
         const oldFilePath = path.join(__dirname, "../../", documentoExistente.arquivo);
         if (fs.existsSync(oldFilePath)) {
@@ -133,11 +155,9 @@ export const updateDocumento = async (req: Request, res: Response): Promise<void
         }
       }
 
-      // Atualizar o caminho do arquivo
       updatedData.arquivo = newFilePath;
     }
 
-    // Atualizar documento no banco de dados
     const updatedDocumento = await prisma.documento.update({
       where: { id: Number(id) },
       data: updatedData,

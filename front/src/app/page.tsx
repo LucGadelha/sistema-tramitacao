@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaEdit, FaTrash, FaFilePdf, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash, FaFilePdf, FaPlus, FaPaperPlane, FaCheckCircle } from "react-icons/fa";
 import Modal from "@/components/Modal"; // Modal reutilizável
 import FormsCadDoc from "@/components/Forms/FormCadDoc";
 import FormEditDoc from "@/components/Forms/FormEditDoc";
@@ -9,6 +9,7 @@ import FormsTramitacaoDoc from  "@/components/Forms/FormTramitacaoDoc";
 
 const DocumentManager = () => {
   interface Documento {
+    dataEnvio: string | number | Date;
     id: number;
     numero: string;
     titulo: string;
@@ -19,6 +20,7 @@ const DocumentManager = () => {
     arquivo: string;
     tipoDocumentoId?: string;
     descricao?: string;
+    tramitacaoId?: number;
   }
 
   const [documentos, setDocumentos] = useState<Documento[]>([]);
@@ -31,13 +33,14 @@ const DocumentManager = () => {
   }, []);
 
   const fetchDocumentos = async () => {
-    try {
-      const response = await axios.get("http://localhost:3030/documentos");
-      setDocumentos(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar documentos", error);
-    }
-  };
+  try {
+    const response = await axios.get("http://localhost:3030/documentos");
+    console.log("Documentos recebidos:", response.data); // Verifique os dados recebidos
+    setDocumentos(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar documentos", error);
+  }
+};
 
   const handleOpenModal = (type: string, documento?: Documento) => {
     setModalType(type);
@@ -73,6 +76,18 @@ const DocumentManager = () => {
     }
   }
 };
+
+  const handleReceiveDocumento = async (tramitacaoId: number) => {
+      console.log(`Recebendo documento com id: ${tramitacaoId}`);
+  try {
+    await axios.put(`http://localhost:3030/tramitacoes/${tramitacaoId}/receber`);
+    atualizarLista();
+  } catch (error) {
+    console.error("Erro ao receber documento:", error);
+    alert("Erro ao registrar recebimento.");
+  }
+};
+
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -110,7 +125,7 @@ const DocumentManager = () => {
                 <td className="py-3 px-6">{doc.numero}</td>
                 <td className="py-3 px-6">{doc.titulo}</td>
                 <td className="py-3 px-6">{doc.setorEnvio?.descricao || '-'}</td>
-                <td className="py-3 px-6">{new Date(doc.dataCadastro).toLocaleString()}</td>
+                <td className="py-3 px-6">{doc.dataEnvio ? new Date(doc.dataEnvio).toLocaleString() : '-'}</td>
                 <td className="py-3 px-6">{doc.setorRecebe?.descricao || '-'}</td>
                 <td className="py-3 px-6">{doc.dataRecebimento ? new Date(doc.dataRecebimento).toLocaleString() : '-'}</td>
                 <td className="py-3 px-6">
@@ -119,18 +134,33 @@ const DocumentManager = () => {
                   </a>
                 </td>
                 <td className="py-3 px-6 text-center flex gap-2 justify-center">
+                {doc.setorEnvio ? (
+                  doc.setorRecebe ? (
+                    <FaCheckCircle className="text-green-500" title="Recebido" />
+                  ) : (
+                    <FaPaperPlane className="text-blue-500" title="Enviado" />
+                  )
+                ) : (
                   <button 
                     className="text-blue-600 hover:text-blue-800" 
                     onClick={() => handleOpenModal("editar", doc)}
                   >
                     <FaEdit />
                   </button>
-                  <button 
-  className="text-red-600 hover:text-red-800" 
-  onClick={() => handleDeleteDocumento(doc.id)}
->
-  <FaTrash />
-</button>
+                )}
+
+                {doc.setorEnvio && !doc.setorRecebe && (
+                  <button className="text-green-600 hover:text-green-800" onClick={() => {
+  console.log("Botão clicado, tramitacaoId:", doc.tramitacaoId);
+  doc.tramitacaoId && handleReceiveDocumento(doc.tramitacaoId);
+}}>
+                    <FaCheckCircle />
+                  </button>
+                )}
+
+                <button className="text-red-600 hover:text-red-800" onClick={() => handleDeleteDocumento(doc.id)}>
+                  <FaTrash />
+                </button>
                 </td>
               </tr>
             ))}

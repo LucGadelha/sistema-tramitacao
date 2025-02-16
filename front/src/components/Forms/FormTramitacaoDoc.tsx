@@ -51,20 +51,23 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
     }
 
     try {
-      await axios.post("http://localhost:3030/tramitacoes", {
+    const response = await axios.post("http://localhost:3030/tramitacoes", {
       documentoId: Number(formData.documentoId),
       setorEnvioId: Number(formData.setorEnvioId),
       setorRecebeId: Number(formData.setorRecebeId),
     });
+
+    if (response.status === 200) {
+      onUpdate(); // Atualiza a lista na tela principal
       setMessage("Tramitação registrada com sucesso!");
-      onUpdate();
       onClose();
-    } catch (error) {
-      console.error("Erro ao registrar tramitação:", error);
-      setMessage("Erro ao registrar tramitação.");
-    } finally {
-      setLoading(false);
     }
+  } catch (error) {
+    console.error("Erro ao registrar tramitação:", error);
+    setMessage("Erro ao registrar tramitação.");
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (

@@ -36,6 +36,7 @@ export const createTramitacao = async (req: Request, res: Response) => {
 export const registrarRecebimento = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    console.log(`Recebendo tramitação com id: ${id}`);
 
     const tramitacao = await prisma.tramitacaoDocumento.findUnique({ where: { id: Number(id) } });
     if (!tramitacao) {
