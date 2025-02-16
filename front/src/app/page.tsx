@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client'
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -59,9 +60,10 @@ const DocumentManager = () => {
   };
 
   // Atualiza a lista de documentos
-  const atualizarLista = () => {
-    fetchDocumentos();
-  };
+  const atualizarLista = async () => {
+  const response = await axios.get("http://localhost:3030/documentos");
+  setDocumentos([...response.data]); // Garante um novo array no estado do React
+};
 
   const handleDeleteDocumento = async (id: number) => {
   const confirmDelete = window.confirm("Tem certeza que deseja deletar este documento?");
@@ -77,11 +79,19 @@ const DocumentManager = () => {
   }
 };
 
-  const handleReceiveDocumento = async (tramitacaoId: number) => {
-      console.log(`Recebendo documento com id: ${tramitacaoId}`);
+  const handleReceiveDocumento = async (tramitacaoId: number, documentoId: number) => {
   try {
     await axios.put(`http://localhost:3030/tramitacoes/${tramitacaoId}/receber`);
+
+    // Atualiza apenas o status do documento recebido
+    setDocumentos((prevDocs) =>
+      prevDocs.map((doc) =>
+        doc.id === documentoId ? { ...doc, status: "Recebido" } : doc
+      )
+    );
     atualizarLista();
+
+    alert("Documento recebido com sucesso!");
   } catch (error) {
     console.error("Erro ao receber documento:", error);
     alert("Erro ao registrar recebimento.");
@@ -150,9 +160,7 @@ const DocumentManager = () => {
                 )}
 
                 {doc.setorEnvio && !doc.setorRecebe && (
-                  <button className="text-green-600 hover:text-green-800" onClick={() => {
-  console.log("Botão clicado, tramitacaoId:", doc.tramitacaoId);
-  doc.tramitacaoId && handleReceiveDocumento(doc.tramitacaoId);
+                  <button className="text-green-600 hover:text-green-800" onClick={() => {doc.tramitacaoId && handleReceiveDocumento(doc.tramitacaoId, doc.id);
 }}>
                     <FaCheckCircle />
                   </button>

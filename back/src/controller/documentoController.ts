@@ -46,11 +46,12 @@ export const getDocumentos = async (_req: Request, res: Response): Promise<void>
       include: {
         tipoDocumento: true,
         tramitacoes: {
+          orderBy: { createdAt: 'desc' },
+          take: 1, // Pega apenas a última tramitação
           include: {
             setorEnvio: true, // Inclui o setor que enviou
             setorRecebe: true,
           },
-          orderBy: { createdAt: 'asc' }, // Ordena pelas tramitações mais antigas
         },
       },
     });

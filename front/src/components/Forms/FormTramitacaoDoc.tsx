@@ -62,9 +62,14 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
       setMessage("Tramitação registrada com sucesso!");
       onClose();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao registrar tramitação:", error);
-    setMessage("Erro ao registrar tramitação.");
+
+    if (error.response && error.response.data.message) {
+      setMessage(error.response.data.message); // Exibir mensagem "Documento está em trâmite"
+    } else {
+      setMessage("Erro ao registrar tramitação.");
+    }
   } finally {
     setLoading(false);
   }

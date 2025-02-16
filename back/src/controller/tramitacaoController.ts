@@ -10,33 +10,35 @@ export const createTramitacao = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "O setor de envio não pode ser o mesmo que o setor de recebimento" });
     }
 
-    // Verificar se o documento foi enviado previamente ou se é o primeiro envio
+    // Verificar se o documento já possui tramitações
     const tramitacoes = await prisma.tramitacaoDocumento.findMany({
       where: { documentoId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: "asc" },
     });
 
     if (tramitacoes.length > 0) {
       const ultimaTramitacao = tramitacoes[tramitacoes.length - 1];
+
       if (!ultimaTramitacao.recebido) {
-        return res.status(400).json({ error: "O documento só pode ser enviado se estiver marcado como recebido" });
+        return res.status(400).json({ message: "Documento está em trâmite" });
       }
     }
 
+    // Criar nova tramitação
     const tramitacao = await prisma.tramitacaoDocumento.create({
       data: { documentoId, setorEnvioId, setorRecebeId },
     });
+
     res.json(tramitacao);
   } catch (error) {
     console.error("Erro ao registrar tramitação:", error);
-    res.status(500).json({ error: "Erro ao registrar tramitação" });
+    res.status(500).json({ error: "Erro interno ao registrar tramitação" });
   }
 };
 
 export const registrarRecebimento = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log(`Recebendo tramitação com id: ${id}`);
 
     const tramitacao = await prisma.tramitacaoDocumento.findUnique({ where: { id: Number(id) } });
     if (!tramitacao) {
