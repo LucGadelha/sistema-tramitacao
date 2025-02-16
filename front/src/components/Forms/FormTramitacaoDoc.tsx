@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
 interface FormsTramitacaoDocProps {
@@ -14,7 +14,9 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
   });
 
   const [documentos, setDocumentos] = useState<{ id: number; titulo: string }[]>([]);
-  const [setores, setSetores] = useState<{ id: number; nome: string }[]>([]);
+  const [setores, setSetores] = useState<{
+    descricao: ReactNode; id: number; nome: string 
+}[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -94,7 +96,7 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
         <option value="">Selecione o Setor de Envio</option>
         {setores.map((setor) => (
           <option key={setor.id} value={setor.id}>
-            {setor.nome}
+            {setor.descricao}
           </option>
         ))}
       </select>
@@ -104,7 +106,7 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
         <option value="">Selecione o Setor de Recebimento</option>
         {setores.map((setor) => (
           <option key={setor.id} value={setor.id}>
-            {setor.nome}
+            {setor.descricao}
           </option>
         ))}
       </select>

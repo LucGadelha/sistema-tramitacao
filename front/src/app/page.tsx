@@ -83,13 +83,14 @@ const DocumentManager = () => {
   try {
     await axios.put(`http://localhost:3030/tramitacoes/${tramitacaoId}/receber`);
 
-    // Atualiza apenas o status do documento recebido
+    const currentDate = new Date().toISOString(); // Obtém a data e hora atual em formato ISO
+
+    // Atualiza o estado do documento recebido e adiciona a data de recebimento
     setDocumentos((prevDocs) =>
       prevDocs.map((doc) =>
-        doc.id === documentoId ? { ...doc, status: "Recebido" } : doc
+        doc.id === documentoId ? { ...doc, status: "Recebido", dataRecebimento: currentDate } : doc
       )
     );
-    atualizarLista();
 
     alert("Documento recebido com sucesso!");
   } catch (error) {

@@ -15,10 +15,11 @@ export const getSetores = async (_req: Request, res: Response) => {
   try {
     const setores = await prisma.setor.findMany();
     
-    // Transformando os dados para corresponder ao que o frontend espera
+    // Retornando os dados conforme esperado pelo frontend
     const setoresFormatados = setores.map((setor) => ({
       id: setor.id,
-      nome: setor.descricao, // Usando 'descricao' como 'nome'
+      sigla: setor.sigla,        
+      descricao: setor.descricao,
     }));
 
     res.json(setoresFormatados);

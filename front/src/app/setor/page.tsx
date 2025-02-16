@@ -86,24 +86,24 @@ export default function SetoresPage() {
       </form>
       <ul>
         {setores.map((setor) => (
-          <li key={setor.id} className="flex justify-between items-center border p-2 mb-2 rounded">
-            <span>{setor.sigla} - {setor.descricao}</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleEdit(setor)}
-                className="bg-yellow-500 text-white p-2 rounded"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => handleDelete(setor.id)}
-                className="bg-red-500 text-white p-2 rounded"
-              >
-                Excluir
-              </button>
-            </div>
-          </li>
-        ))}
+  <li key={setor.id} className="flex justify-between items-center border p-2 mb-2 rounded">
+    <span>{setor.sigla} - {setor.descricao}</span>
+    <div className="flex gap-2">
+      <button
+        onClick={() => handleEdit(setor)}
+        className="bg-yellow-500 text-white p-2 rounded"
+      >
+        Editar
+      </button>
+      <button
+        onClick={() => handleDelete(setor.id)}
+        className="bg-red-500 text-white p-2 rounded"
+      >
+        Excluir
+      </button>
+    </div>
+  </li>
+))}
       </ul>
     </div>
   );
