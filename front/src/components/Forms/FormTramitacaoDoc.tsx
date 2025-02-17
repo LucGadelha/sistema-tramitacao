@@ -19,6 +19,11 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
 }[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({
+      documentoId: "",
+    setorEnvioId: "",
+    setorRecebeId: "",
+    });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,10 +46,38 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
+  const validateFields = () => {
+    const newErrors = { documentoId: "",setorEnvioId: "", setorRecebeId: "",};
+    let isValid = true;
+
+    if (!formData.documentoId) {
+      newErrors.documentoId = "O documento é obrigatório.";
+      isValid = false;
+    }
+    if (!formData.setorEnvioId) {
+      newErrors.setorEnvioId = "Selecione um setor.";
+      isValid = false;
+    }
+    if (!formData.setorRecebeId) {
+      newErrors.setorRecebeId = "Selecionar um setor.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    if (!validateFields()) {
+      setLoading(false);
+      return;
+    }
 
     if (formData.setorEnvioId === formData.setorRecebeId) {
       setMessage("O setor de envio não pode ser o mesmo que o setor de recebimento.");
@@ -90,6 +123,7 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
           </option>
         ))}
       </select>
+      {errors.documentoId && <p className="text-red-500 text-sm">{errors.documentoId}</p>}
 
       {/* Selecionar Setor de Envio */}
       <select name="setorEnvioId" value={formData.setorEnvioId} onChange={handleChange} className="border rounded px-3 py-2 w-full">
@@ -100,6 +134,7 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
           </option>
         ))}
       </select>
+      {errors.setorEnvioId && <p className="text-red-500 text-sm">{errors.setorEnvioId}</p>}
 
       {/* Selecionar Setor de Recebimento */}
       <select name="setorRecebeId" value={formData.setorRecebeId} onChange={handleChange} className="border rounded px-3 py-2 w-full">
@@ -110,6 +145,7 @@ const FormsTramitacaoDoc: React.FC<FormsTramitacaoDocProps> = ({ onClose, onUpda
           </option>
         ))}
       </select>
+      {errors.setorRecebeId && <p className="text-red-500 text-sm">{errors.setorRecebeId}</p>}
 
       {message && <p className="text-center text-sm text-red-500">{message}</p>}
 

@@ -147,7 +147,7 @@ const DocumentManager = () => {
                 </td>
                 <td className="py-3 px-6 text-center flex gap-2 justify-center">
                 {doc.setorEnvio ? (
-                  doc.setorRecebe ? (
+                  doc.dataRecebimento ? (
                     <FaCheckCircle className="text-green-500" title="Recebido" />
                   ) : (
                     <FaPaperPlane className="text-blue-500" title="Enviado" />
@@ -161,7 +161,7 @@ const DocumentManager = () => {
                   </button>
                 )}
 
-                {doc.setorEnvio && !doc.setorRecebe && (
+                {doc.setorEnvio && !doc.dataRecebimento && (
                   <button className="text-green-600 hover:text-green-800" onClick={() => {doc.tramitacaoId && handleReceiveDocumento(doc.tramitacaoId, doc.id);
 }}>
                     <FaCheckCircle />

@@ -49,7 +49,7 @@ export const getDocumentos = async (_req: Request, res: Response): Promise<void>
           orderBy: { createdAt: 'desc' },
           take: 1, // Pega apenas a última tramitação
           include: {
-            setorEnvio: true, // Inclui o setor que enviou
+            setorEnvio: true,
             setorRecebe: true,
           },
         },
@@ -58,19 +58,21 @@ export const getDocumentos = async (_req: Request, res: Response): Promise<void>
 
     // Formata os documentos para incluir o setor de envio e a data de envio
     const documentosFormatados = documentos.map(doc => {
-      const tramitacaoRecebida = doc.tramitacoes.find(tr => tr.recebido); // Busca a tramitação recebida
+      const tramitacaoRecebida = doc.tramitacoes.find(tr => tr.recebido);
       const primeiraTramiacao = doc.tramitacoes[0]; // Pega a primeira tramitação
+      
+      
 
       return {
         ...doc,
-        tramitacaoId: primeiraTramiacao?.id, // Pega o ID da primeira tramitação
-        setorEnvio: doc.tramitacoes[0]?.setorEnvio, // Pega o setor da primeira tramitação
-        dataEnvio: doc.tramitacoes[0]?.createdAt || null, // Pega a data da primeira tramitação
-        setorRecebe: tramitacaoRecebida?.setorRecebe, // Pega o setor que recebeu, se houver
-        dataRecebimento: tramitacaoRecebida?.createdAt || null, // Pega a data de recebimento, se houver
+        tramitacaoId: primeiraTramiacao?.id, // ID da primeira tramitação
+        setorEnvio: doc.tramitacoes[0]?.setorEnvio, // Setor da primeira tramitação
+        dataEnvio: doc.tramitacoes[0]?.createdAt || null, // Data da primeira tramitação
+        setorRecebe: doc.tramitacoes[0]?.setorRecebe, // Setor que recebeu
+        dataRecebimento: tramitacaoRecebida?.createdAt || null, // Data de recebimento
+        
       };
     });
-
     res.json(documentosFormatados);
   } catch (error) {
     console.error("Erro ao buscar documentos:", error);
@@ -174,8 +176,31 @@ export const updateDocumento = async (req: Request, res: Response): Promise<void
 export const deleteDocumento = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const documentoId = Number(id);
 
-    await prisma.documento.delete({ where: { id: Number(id) } });
+    // Verifica se o documento existe
+    const documentoExistente = await prisma.documento.findUnique({
+      where: { id: documentoId },
+    });
+
+    if (!documentoExistente) {
+      res.status(404).json({ error: "Documento não encontrado" });
+      return;
+    }
+
+    // Remove as tramitações associadas ao documento (se existirem)
+    await prisma.tramitacaoDocumento.deleteMany({
+      where: { documentoId: documentoId },
+    });
+
+     // Se o documento tem um arquivo, exclui-o do servidor
+    const filePath = path.join(__dirname, "../../", documentoExistente.arquivo);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    
+    // Remove o documento
+    await prisma.documento.delete({ where: { id: documentoId } });
 
     res.json({ message: "Documento deletado com sucesso" });
   } catch (error) {

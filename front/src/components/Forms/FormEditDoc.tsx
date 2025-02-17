@@ -20,6 +20,12 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [tiposDocumento, setTiposDocumento] = useState<{ id: number; descricao: string }[]>([]); // Estado para armazenar tipos de documentos
+  const [errors, setErrors] = useState({
+    numero: "",
+    tipoDocumentoId: "",
+    titulo: "",
+    descricao: "",
+  });
 
   useEffect(() => {
     const fetchTiposDocumento = async () => {
@@ -43,7 +49,6 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
 
   const fetchDocumento = async () => {
     try {
-    console.log("Buscando documento com ID:", documentoId); // Depuração
 
     const response = await axios.get(`http://localhost:3030/documentos/${documentoId}`);
     
@@ -70,11 +75,43 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
     }
   };
 
+  const validateFields = () => {
+    const newErrors = { numero: "", tipoDocumentoId: "", titulo: "", descricao: "", anexo: "" };
+    let isValid = true;
+
+    if (!formData.numero.trim()) {
+      newErrors.numero = "O número do documento é obrigatório.";
+      isValid = false;
+    }
+    if (!formData.tipoDocumentoId) {
+      newErrors.tipoDocumentoId = "Selecione um tipo de documento.";
+      isValid = false;
+    }
+    if (!formData.titulo.trim()) {
+      newErrors.titulo = "O título é obrigatório.";
+      isValid = false;
+    }
+    if (!formData.descricao.trim()) {
+      newErrors.descricao = "A descrição é obrigatória.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
+    // Validação simples dos campos obrigatórios
+    if (!validateFields()) {
+      setLoading(false);
+      return;
+    }
+
+    // Monta o FormData para enviar os dados
     const formDataToSend = new FormData();
     formDataToSend.append("numero", formData.numero);
     formDataToSend.append("tipoDocumentoId", formData.tipoDocumentoId);
@@ -112,13 +149,13 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
           value={formData.numero}
           onChange={handleChange}
           placeholder="Nº Documento"
-          className="border border-gray-300 rounded-md px-3 py-2 w-full"
+          className={`border ${errors.numero ? "border-red-500" : "border-gray-300"} rounded-md px-3 py-2 w-full`}
         />
         <select
           name="tipoDocumentoId"
           value={formData.tipoDocumentoId}
           onChange={handleChange}
-          className="border border-gray-300 rounded-md px-3 py-2 w-full"
+          className={`border ${errors.tipoDocumentoId ? "border-red-500" : "border-gray-300"} rounded-md px-3 py-2 w-full`}
         >
           <option value="">Tipo de Documento</option>
           {tiposDocumento.map((tipo) => (
@@ -127,6 +164,7 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
             </option>
           ))}
         </select>
+        {errors.tipoDocumentoId && <p className="text-red-500 text-sm">{errors.tipoDocumentoId}</p>}
       </div>
 
       {/* Título */}
@@ -136,7 +174,7 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
         value={formData.titulo}
         onChange={handleChange}
         placeholder="Título"
-        className="border border-gray-300 rounded-md px-3 py-2 w-full"
+        className={`border ${errors.titulo ? "border-red-500" : "border-gray-300"} rounded-md px-3 py-2 w-full`}
       />
 
       {/* Descrição */}
@@ -145,7 +183,7 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
         value={formData.descricao}
         onChange={handleChange}
         placeholder="Descrição"
-        className="border border-gray-300 rounded-md px-3 py-2 w-full h-24"
+        className={`border ${errors.descricao ? "border-red-500" : "border-gray-300"} rounded-md px-3 py-2 w-full h-24`}
       />
 
       {/* Anexo */}
@@ -154,7 +192,7 @@ const FormEditDoc: React.FC<EditDocProps> = ({ documentoId, onClose, onUpdate })
         <span className="text-gray-600">{formData.anexo ? formData.anexo.name : "Anexo"}</span>
         <input type="file" name="anexo" onChange={handleFileChange} className="hidden" />
       </label>
-
+      
       {/* Mensagem de sucesso ou erro */}
       {message && <p className="text-center text-sm">{message}</p>}
 
